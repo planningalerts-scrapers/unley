@@ -41,11 +41,12 @@ while summary_page
     tr.css('td').collect { |td| td.inner_text.strip }
   end
 
-  next_page_img = summary_page.root.at_xpath("//a/img[contains(@src, 'nextPage')]")
+  next_page_img = summary_page.root.at_xpath("//td/input[contains(@src, 'nextPage')]")
   summary_page = nil
   if next_page_img
     p "Found another page"
-    summary_page = agent.get "#{base_url}#{next_page_img.parent['href']}"
+    next_page_path = next_page_img['onclick'].split(',').find { |e| e =~ /.*PageNumber=\d+.*/ }.gsub('"', '').strip
+    summary_page = agent.get "#{base_url}#{next_page_path}"
   end
 end
 
