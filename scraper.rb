@@ -7,7 +7,7 @@ scraper = EpathwayScraper::Scraper.new(
   "https://online.unley.sa.gov.au/ePathway/Production"
 )
 
-agent = Mechanize.new
+agent = scraper.agent
 
 p "Getting first page"
 first_page = agent.get url
@@ -32,22 +32,6 @@ button = search_form.button_with(:value => "Search")
 # submit the form using that button
 summary_page = agent.submit(search_form, button)
 
-count = 0
-while summary_page
-  EpathwayScraper::Page::Index.scrape_index_page(summary_page, scraper.base_url, scraper.agent) do |record|
-    EpathwayScraper.save(record)
-  end
-
-  next_page_img = summary_page.root.at_xpath("//td/input[contains(@src, 'nextPage')]")
-  summary_page = nil
-  if next_page_img
-    count += 1
-    if count > 50  # safety precaution
-      p "Stopping paging after " + count.to_s + " pages."
-      break
-    end
-    next_page_path = next_page_img['onclick'].split(',').find { |e| e =~ /.*PageNumber=\d+.*/ }.gsub('"', '').strip
-    p "Next page: " + next_page_path
-    summary_page = agent.get "#{base_url}#{next_page_path}"
-  end
+EpathwayScraper::Page::Index.scrape_all_index_pages(nil, scraper.base_url, scraper.agent) do |record|
+  EpathwayScraper.save(record)
 end
