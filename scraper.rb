@@ -3,6 +3,10 @@ require "epathway_scraper"
 base_url = "https://online.unley.sa.gov.au/ePathway/Production/Web/GeneralEnquiry/"
 url = "#{base_url}enquirylists.aspx"
 
+scraper = EpathwayScraper::Scraper.new(
+  "https://online.unley.sa.gov.au/ePathway/Production"
+)
+
 agent = Mechanize.new
 
 p "Getting first page"
@@ -36,7 +40,7 @@ while summary_page
     record = {
       'council_reference' => data[:council_reference],
       # There is a direct link but you need a session to access it :(
-      'info_url' => url,
+      'info_url' => scraper.base_url,
       'description' => data[:description],
       'date_received' => data[:date_received],
       'address' => data[:address],
