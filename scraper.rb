@@ -10,7 +10,7 @@ scraper = EpathwayScraper::Scraper.new(
 agent = scraper.agent
 
 p "Getting first page"
-first_page = agent.get url
+first_page = agent.get(scraper.base_url)
 url_query = url + '?' + first_page.body.scan(/js=-?\d+/)[0]  # enable JavaScript
 first_page = agent.get url_query
 
