@@ -35,9 +35,9 @@ count = 0
 das_data = []
 while summary_page
   table = summary_page.root.at_css('.ContentPanel')
-  headers = table.css('th').collect { |th| th.inner_text.strip } 
+  headers = table.css('th').collect { |th| th.inner_text.strip }
 
-  das_data = das_data + table.css('.ContentPanel, .AlternateContentPanel').collect do |tr| 
+  das_data = das_data + table.css('.ContentPanel, .AlternateContentPanel').collect do |tr|
     tr.css('td').collect { |td| td.inner_text.strip }
   end
 
@@ -67,7 +67,7 @@ das = das_data.collect do |da_item|
   if page_info['description'].strip == ''
     page_info['description'] = 'No description provided'
   end
-  
+
   page_info
 end
 
