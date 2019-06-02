@@ -34,19 +34,7 @@ summary_page = agent.submit(search_form, button)
 
 count = 0
 while summary_page
-  table = summary_page.root.at_css('.ContentPanel')
-  EpathwayScraper::Table.extract_table_data_and_urls(table).each do |row|
-    data = EpathwayScraper::Page::Index.extract_index_data(row)
-    record = {
-      'council_reference' => data[:council_reference],
-      # There is a direct link but you need a session to access it :(
-      'info_url' => scraper.base_url,
-      'description' => data[:description],
-      'date_received' => data[:date_received],
-      'address' => data[:address],
-      'date_scraped' => Date.today.to_s
-    }
-
+  EpathwayScraper::Page::Index.scrape_index_page(summary_page, scraper.base_url, scraper.agent) do |record|
     EpathwayScraper.save(record)
   end
 
