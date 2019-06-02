@@ -32,13 +32,14 @@ count = 0
 while summary_page
   table = summary_page.root.at_css('.ContentPanel')
   EpathwayScraper::Table.extract_table_data_and_urls(table).each do |row|
+    data = EpathwayScraper::Page::Index.extract_index_data(row)
     record = {
-      'council_reference' => row[:content]["Number"],
+      'council_reference' => data[:council_reference],
       # There is a direct link but you need a session to access it :(
       'info_url' => url,
-      'description' => row[:content]['Description'],
-      'date_received' => Date.strptime(row[:content]['Lodgement Date'], '%d/%m/%Y').to_s,
-      'address' => row[:content]['Location'],
+      'description' => data[:description],
+      'date_received' => data[:date_received],
+      'address' => data[:address],
       'date_scraped' => Date.today.to_s
     }
 
