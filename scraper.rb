@@ -6,16 +6,7 @@ require 'logger'
 base_url = "https://online.unley.sa.gov.au/ePathway/Production/Web/GeneralEnquiry/"
 url = "#{base_url}enquirylists.aspx"
 
-agent = Mechanize.new do |a|
-  a.keep_alive = true
-  # a.log = Logger.new $stderr
-  # a.agent.http.debug_output = $stderr
-  # a.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  if !ENV['MORPH_PROXY'].nil?
-    host, port = ENV['MORPH_PROXY'].split(":")
-    a.set_proxy(host, port)
-  end
-end
+agent = Mechanize.new
 
 p "Getting first page"
 first_page = agent.get url
