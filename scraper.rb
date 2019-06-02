@@ -43,10 +43,6 @@ while summary_page
       'date_scraped' => Date.today.to_s
     }
 
-    if record['description'].strip == ''
-      record['description'] = 'No description provided'
-    end
-
     EpathwayScraper.save(record)
   end
 
