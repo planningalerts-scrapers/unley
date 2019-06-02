@@ -1,7 +1,4 @@
-require 'scraperwiki'
-require 'mechanize'
-require 'date'
-require 'logger'
+require "epathway_scraper"
 
 base_url = "https://online.unley.sa.gov.au/ePathway/Production/Web/GeneralEnquiry/"
 url = "#{base_url}enquirylists.aspx"
@@ -32,13 +29,24 @@ button = search_form.button_with(:value => "Search")
 summary_page = agent.submit(search_form, button)
 
 count = 0
-das_data = []
 while summary_page
   table = summary_page.root.at_css('.ContentPanel')
-  headers = table.css('th').collect { |th| th.inner_text.strip }
+  EpathwayScraper::Table.extract_table_data_and_urls(table).each do |row|
+    record = {
+      'council_reference' => row[:content]["Number"],
+      # There is a direct link but you need a session to access it :(
+      'info_url' => url,
+      'description' => row[:content]['Description'],
+      'date_received' => Date.strptime(row[:content]['Lodgement Date'], '%d/%m/%Y').to_s,
+      'address' => row[:content]['Location'],
+      'date_scraped' => Date.today.to_s
+    }
 
-  das_data = das_data + table.css('.ContentPanel, .AlternateContentPanel').collect do |tr|
-    tr.css('td').collect { |td| td.inner_text.strip }
+    if record['description'].strip == ''
+      record['description'] = 'No description provided'
+    end
+
+    EpathwayScraper.save(record)
   end
 
   next_page_img = summary_page.root.at_xpath("//td/input[contains(@src, 'nextPage')]")
@@ -54,25 +62,3 @@ while summary_page
     summary_page = agent.get "#{base_url}#{next_page_path}"
   end
 end
-
-das = das_data.collect do |da_item|
-  page_info = {}
-  page_info['council_reference'] = da_item[headers.index('Number')]
-  # There is a direct link but you need a session to access it :(
-  page_info['info_url'] = url
-  page_info['description'] = da_item[headers.index('Description')]
-  page_info['date_received'] = Date.strptime(da_item[headers.index('Lodgement Date')], '%d/%m/%Y').to_s
-  page_info['address'] = da_item[headers.index('Location')]
-  page_info['date_scraped'] = Date.today.to_s
-  if page_info['description'].strip == ''
-    page_info['description'] = 'No description provided'
-  end
-
-  page_info
-end
-
-das.each do |record|
-  ScraperWiki.save_sqlite(['council_reference'], record)
-end
-
-p "Complete."
